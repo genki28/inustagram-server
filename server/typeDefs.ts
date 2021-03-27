@@ -10,8 +10,9 @@ export const typeDefs = gql`
     }
 
     type Anime {
-        id: ID!
-        title:String
+        id: ID
+        title: String
+        hero: String
     }
 
     type Query {
@@ -28,7 +29,7 @@ export const typeDefs = gql`
 
     type Mutation {
         deleteAnime(animeId: ID!): AnimeUpdateResponse
-        updateTitle(animeId: ID!, title: String): AnimeUpdateResponse
-        createAnime(title: String): AnimeUpdateResponse
+        updateAnime(animeId: ID!, title: String, hero: String): AnimeUpdateResponse
+        createAnime(title: String, hero: String): [Anime]
     }
 `
