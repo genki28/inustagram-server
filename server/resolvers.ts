@@ -43,24 +43,32 @@ export const resolvers = {
     },
 
     Mutation: {
-        createAnime(_: any, data: { title: string, hero: string }) {
+        createAnime(_: any, data: { title: string, hero: string }, { pubsub }: any, info: any) {
             // const animes = repo.getAnimes()
             // const animes = animes
             const id = animes.length + 1
+            const anime = {
+                id: id,
+                title: data.title,
+                hero: data.hero
+            }
 
             // logger.debug('hello')
             // logger.debug(data)
             // logger.debug(data.title)
             // logger.debug(data.hero)
-            animes.push({
-                id: id,
-                title: data.title,
-                hero: data.hero
+            animes.push(anime)
+            // Animeで良い？post？
+            pubsub.publish('anime', {
+                Anime: {
+                    mutation: 'CREATED',
+                    data: animes
+                }
             })
             return animes
         },
 
-        updateAnime(_: any, data: {animeId: number, title: string, hero: string}) {
+        updateAnime(_: any, data: {animeId: number, title: string, hero: string}, { pubsub }: any, info: any) {
             // logger.debug('test')
             const index = Number(data.animeId) - 1
             const updateData = {
@@ -69,6 +77,13 @@ export const resolvers = {
                 hero: data.hero
             }
             animes[index] = Object.assign(animes[index], updateData)
+
+            pubsub.publish('anime', {
+                Anime: {
+                    mutation: 'UPDATED',
+                    data: animes
+                }
+            })
             return {
                 success: true,
                 message: 'OK',
@@ -76,14 +91,29 @@ export const resolvers = {
             }
         },
 
-        deleteAnime(_: any, data: {animeId: number}) {
+        // 第二引数はargsで良いか
+        deleteAnime(_: any, data: {animeId: number}, {pubsub}: any, info: any) {
             const index = Number(data.animeId) - 1
             animes.splice(index, 1)
-            // logger.debug(animes)
+
+            pubsub.publish('anime', {
+                Anime: {
+                    mutation: 'DELETED',
+                    data: animes
+                }
+            })
             return {
                 success: true,
                 message: 'OK',
                 anime: animes
+            }
+        }
+    },
+    
+    Subscription: {
+        Anime: {
+            subscribe(parent: any, args: any, { pubsub }: any, info: any) {
+                return pubsub.asyncIterator('anime')
             }
         }
     }
