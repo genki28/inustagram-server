@@ -5,17 +5,6 @@ const repo = new AnimeRepository()
 const logger = getLogger()
 logger.level = 'debug'
 
-const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin'
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster'
-    }
-]
-
 const animes = [
     {
         id: 1,
@@ -29,20 +18,39 @@ const animes = [
     }
 ]
 
+const messages = [
+    {
+        id: 1,
+        sendUser: 1,
+        receiveUser: 2,
+        message: 'こんにちは'
+    },
+    {
+        id: 2,
+        sendUser: 2,
+        receiveUser: 1,
+        message: 'hi!hi!'
+    }
+]
+
 export const resolvers = {
     Query: {
-        books: () => books,
         animes: () => animes,
         anime: ({ id }: { id: number }) => {
             const anime = repo.getAnime(id)
             return anime ? anime : []
-        }
+        },
         // animes: async (_, _, { dataSources }) =>
         //     await dataSources.animeAPI.getAllAnimes(),
         // anime: async()
+        messages: () => messages,
+        message: ({ id }: { id: number }) => {
+            const message = repo.getMessage(id)
+        }
     },
 
     Mutation: {
+        // アニメ系のテスト
         createAnime(_: any, data: { title: string, hero: string }, { pubsub }: any, info: any) {
             // const animes = repo.getAnimes()
             // const animes = animes
@@ -107,6 +115,31 @@ export const resolvers = {
                 message: 'OK',
                 anime: animes
             }
+        },
+
+        // 本ちゃんのアプリ
+        // messageの型で型付けしたい
+        createMessage(_: any, args: any, {pubsub}: any, info: any) {
+            const id = messages.length + 1
+            const message = {
+                id: id,
+                sendUser: args.sendUser,
+                receiveUser: args.receiveUser,
+                message: args.message
+            }
+
+            messages.push(message)
+            pubsub.publish('message', {
+                Message: {
+                    mutation: 'CREATED',
+                    data: messages
+                }
+            })
+            return {
+                success: true,
+                responseMessage: 'OK',
+                data: messages
+            }
         }
     },
     
@@ -114,6 +147,11 @@ export const resolvers = {
         Anime: {
             subscribe(parent: any, args: any, { pubsub }: any, info: any) {
                 return pubsub.asyncIterator('anime')
+            }
+        },
+        Message: {
+            subscribe(parent: any, args: any, {pubsub}: any, info: any) {
+                return pubsub.asyncIterator('message')
             }
         }
     }

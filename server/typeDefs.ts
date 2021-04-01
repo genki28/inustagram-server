@@ -2,9 +2,16 @@ import { gql } from 'apollo-server'
 
 export const typeDefs = gql`
     ## query
-    type Book {
-        title: String
-        author: String
+    # type User {
+    #     id: ID
+    #     name: String
+    # }
+
+    type Message {
+        id: ID
+        sendUser: Int
+        receiveUser: Int
+        message: String
     }
 
     type Anime {
@@ -14,12 +21,19 @@ export const typeDefs = gql`
     }
 
     type Query {
-        books: [Book]
+        message(id: ID!): Message
+        messages: [Message]
         animes: [Anime]
         anime(id: ID!): Anime
     }
 
     ## mutation
+    type SendMessageResponse {
+        success: Boolean!
+        responseMessage: String
+        data: [Message]
+    }
+
     type AnimeUpdateResponse{
         success: Boolean!
         message: String
@@ -27,6 +41,9 @@ export const typeDefs = gql`
     }
 
     type Mutation {
+        createMessage(message: String, sendUser: Int, receiveUser: Int): SendMessageResponse
+        deleteMessage(messageId: ID!): SendMessageResponse
+        
         deleteAnime(animeId: ID!): AnimeUpdateResponse
         updateAnime(animeId: ID!, title: String, hero: String): AnimeUpdateResponse
         createAnime(title: String, hero: String): [Anime]
@@ -34,6 +51,7 @@ export const typeDefs = gql`
 
     ## subscription
     type Subscription {
+        Message: MessageSubscription!
         Anime: PostSubscriptionPayload!
     }
 
@@ -46,6 +64,11 @@ export const typeDefs = gql`
     }
 
     # subscriptionのフィールド
+    type MessageSubscription {
+        mutation: MutationType!
+        data: [Message]
+    }
+
     type PostSubscriptionPayload {
         mutation: MutationType!
         data: [Anime]!

@@ -1,14 +1,3 @@
-const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin'
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster'
-    }
-]
-
 const animes = [
     {
         id: 1,
@@ -22,11 +11,22 @@ const animes = [
     }
 ]
 
-export class AnimeRepository {
-    AllBooks() {
-        return books
+const messages = [
+    {
+        id: 1,
+        sendUser: 1,
+        receiveUser: 2,
+        message: 'こんにちは'
+    },
+    {
+        id: 2,
+        sendUser: 2,
+        receiveUser: 1,
+        message: 'hi!hi!'
     }
+]
 
+export class AnimeRepository {
     getAnimes() {
         return animes
     }
@@ -36,5 +36,12 @@ export class AnimeRepository {
             return id === item.id
         })
         return anime
+    }
+
+    getMessage(id: number) {
+        const message = messages.filter((item) => {
+            return id === item.id
+        })
+        return message
     }
 }
